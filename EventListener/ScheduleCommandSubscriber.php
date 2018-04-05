@@ -6,6 +6,7 @@ use Emdrive\Command\ScheduledCommandInterface;
 use Emdrive\InterruptableExecutionTrait;
 use Emdrive\Service\PidService;
 use Emdrive\Service\ScheduleService;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
@@ -16,27 +17,12 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
 {
     use InterruptableExecutionTrait;
 
-    /**
-     * @var ScheduleService
-     */
-    private $schedule;
-
-    /**
-     * @var PidService
-     */
-    private $pidService;
-
-    /**
-     * @required
-     * @param ScheduleService $schedule
-     */
-    public function setSchedule(ScheduleService $schedule)
+    public function __construct(ContainerInterface $container)
     {
-        $this->schedule = $schedule;
+        $this->container = $container;
     }
 
     /**
-     * @required
      * @param PidService $schedule
      */
     public function setPidService(PidService $pidService)
@@ -65,9 +51,9 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
 
         if ($command instanceof ScheduledCommandInterface && $event->commandShouldRun()) {
             $this->initInterruptHandler();
-            $this->pidService->save($command);
+            $this->container->get(PidService::class)->save($command);
 
-            $this->schedule->setRunning($command->getName());
+            $this->container->get(ScheduleService::class)->setRunning($command->getName());
 
             register_shutdown_function(function () use ($command) {
                 if (error_get_last()) {
@@ -93,8 +79,8 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
     public function complete(ScheduledCommandInterface $command)
     {
         if (!$this->isComplete) {
-            $this->pidService->remove($command);
-            $this->schedule->setStopped($command->getName(), $this->isError, $this->isInterrupted());
+            $this->container->get(PidService::class)->remove($command);
+            $this->container->get(ScheduleService::class)->setStopped($command->getName(), $this->isError, $this->isInterrupted());
             //sleep(2);
 
             $this->isComplete = true;
