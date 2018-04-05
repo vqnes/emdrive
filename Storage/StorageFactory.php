@@ -22,7 +22,7 @@ class StorageFactory
                 return new Mysql($dsn, $username, $password);
                 break;
             case preg_match('/^sqlite/', $dsn):
-                return new Sqlite($dsn, $username, $password);
+                return new Sqlite($dsn);
                 break;
             default:
                 throw new \InvalidArgumentException('Unknown storage type');

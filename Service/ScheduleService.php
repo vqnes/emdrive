@@ -4,7 +4,6 @@ namespace Emdrive\Service;
 
 use Emdrive\DependencyInjection\Config;
 use Emdrive\Storage\StorageInterface;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Helper\Table;
 
 class ScheduleService
@@ -18,21 +17,12 @@ class ScheduleService
     const STATUS_INTERRUPTED = 'interrupted';
 
     private $storage;
-    private $container;
     private $serverName;
 
-    public function __construct(ContainerInterface $container, Config $config)
+    public function __construct(StorageInterface $storage, Config $config)
     {
-        $this->container = $container;
+        $this->storage = $storage;
         $this->serverName = $config->serverName;
-    }
-
-    private function getStorage()
-    {
-        if (!$this->storage) {
-            $this->storage = $this->container->get(StorageInterface::class);
-        }
-        return $this->storage;
     }
 
     public function findJobsToBeStarted($limit, $excludeNames)
@@ -53,12 +43,12 @@ class ScheduleService
 
     public function getAll()
     {
-        return $this->getStorage()->find(StorageInterface::TABLE_SCHEDULE);
+        return $this->storage->find(StorageInterface::TABLE_SCHEDULE);
     }
 
     public function setRunning($name)
     {
-        return $this->getStorage()->updateRow(
+        return $this->storage->updateRow(
             StorageInterface::TABLE_SCHEDULE,
             [
                 'status' => self::STATUS_RUNNING,
@@ -95,7 +85,7 @@ class ScheduleService
 
     public function updateJob($name, $fields)
     {
-        return $this->getStorage()->updateRow(
+        return $this->storage->updateRow(
             StorageInterface::TABLE_SCHEDULE,
             $fields,
             ['name' => $name]
@@ -104,24 +94,24 @@ class ScheduleService
 
     public function addJob($fields)
     {
-        return $this->getStorage()->insertRow(StorageInterface::TABLE_SCHEDULE, $fields);
+        return $this->storage->insertRow(StorageInterface::TABLE_SCHEDULE, $fields);
     }
 
     public function removeJob($name)
     {
-        return $this->getStorage()->removeRow(StorageInterface::TABLE_SCHEDULE, ['name' => $name]);
+        return $this->storage->removeRow(StorageInterface::TABLE_SCHEDULE, ['name' => $name]);
     }
 
     public function findByName($name)
     {
-        $rows = $this->getStorage()->find(StorageInterface::TABLE_SCHEDULE, ['name' => $name]);
+        $rows = $this->storage->find(StorageInterface::TABLE_SCHEDULE, ['name' => $name]);
 
         return current($rows);
     }
 
     public function createTable()
     {
-        return $this->getStorage()->createScheduleTable();
+        return $this->storage->createScheduleTable();
     }
 
 

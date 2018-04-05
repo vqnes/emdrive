@@ -5,15 +5,24 @@ namespace Emdrive\Storage;
 class Sqlite implements StorageInterface
 {
     private $db;
+    private $dsn;
 
-    public function __construct($dsn, $username = null, $password = null)
+    public function __construct($dsn)
     {
-        $this->db = new \PDO($dsn);
+        $this->dsn = $dsn;
+    }
+
+    private function getDb()
+    {
+        if (null === $this->db) {
+            $this->db = new \PDO($this->dsn);
+        }
+        return $this->db;
     }
 
     public function find($table, array $where = [])
     {
-        $stmt = $this->db->query(sprintf(
+        $stmt = $this->getDb()->query(sprintf(
             'SELECT * FROM %s %s',
             $table,
             ($where ? ' WHERE ' . $this->arrayToSql($where, 'AND') : '')
@@ -28,7 +37,7 @@ class Sqlite implements StorageInterface
 
     public function updateRow($table, array $fields, array $where)
     {
-        $this->db->exec(sprintf(
+        $this->getDb()->exec(sprintf(
             "UPDATE %s SET %s WHERE %s",
             $table,
             $this->arrayToSql($fields, ','),
@@ -38,17 +47,17 @@ class Sqlite implements StorageInterface
 
     public function insertRow($table, array $fields)
     {
-        $this->db->exec(sprintf(
+        $this->getDb()->exec(sprintf(
             'INSERT INTO `%s` ( %s ) VALUES ( %s )',
             $table,
             join(",", array_keys($fields)),
-            join(",", array_map(function ($val) {return $this->db->quote($val);}, $fields))
+            join(",", array_map(function ($val) {return $this->getDb()->quote($val);}, $fields))
         ));
     }
 
     public function removeRow($table, array $where)
     {
-        $this->db->exec(sprintf(
+        $this->getDb()->exec(sprintf(
             'DELETE FROM `%s` WHERE %s',
             $table,
             $this->arrayToSql($where, 'AND')
@@ -66,7 +75,7 @@ class Sqlite implements StorageInterface
 
     public function createScheduleTable()
     {
-        $this->db->exec(
+        $this->getDb()->exec(
             'CREATE TABLE IF NOT EXISTS `' . self::TABLE_SCHEDULE . '` (
               `name` varchar(50) NOT NULL,
               `server_name` varchar(100) DEFAULT NULL,
