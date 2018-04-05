@@ -1,0 +1,10 @@
+services:
+    Emdrive\:
+        autowire: true
+        autoconfigure: true
+        public: false
+        resource: '../../*'
+        # you can exclude directories or files
+        # but if a service is unused, it's removed anyway
+        exclude: '../../{Entity,Migrations,Tests}'
+
