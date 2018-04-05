@@ -13,7 +13,16 @@ class Mysql implements StorageInterface
     private function getDb()
     {
         if (null === $this->db) {
-            $this->db = new \PDO($this->dsn, $this->username, $this->password);
+            $this->dsn = str_replace('mysql://', '', $this->dsn);
+
+            list($host, $dbname) = explode('/', $this->dsn);
+
+            $port = 3306;
+            if (count(explode(':', $host))) {
+                list($host, $port) = explode(':', $host);
+            }
+
+            $this->db = new \PDO("mysql:host=$host;dbname=$dbname;port=$port", $this->username, $this->password);
         }
         return $this->db;
     }
