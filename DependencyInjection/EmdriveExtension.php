@@ -20,14 +20,20 @@ class EmdriveExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $filesystem = new Filesystem();
-        $filesystem->mkdir($config['log_dir']);
-        $filesystem->chmod($config['log_dir'], 0777);
+        if (!is_dir($config['log_dir'])) {
+            $filesystem->mkdir($config['log_dir']);
+            $filesystem->chmod($config['log_dir'], 0777);
+        }
 
-        $filesystem->mkdir($config['pid_dir']);
-        $filesystem->chmod($config['pid_dir'], 0777);
+        if (!is_dir($config['pid_dir'])) {
+            $filesystem->mkdir($config['pid_dir']);
+            $filesystem->chmod($config['pid_dir'], 0777);
+        }
 
-        $filesystem->mkdir($config['lock_dir']);
-        $filesystem->chmod($config['lock_dir'], 0777);
+        if (!is_dir($config['lock_dir'])) {
+            $filesystem->mkdir($config['lock_dir']);
+            $filesystem->chmod($config['lock_dir'], 0777);
+        }
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');
