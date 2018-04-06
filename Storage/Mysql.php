@@ -18,7 +18,7 @@ class Mysql implements StorageInterface
             list($host, $dbname) = explode('/', $this->dsn);
 
             $port = 3306;
-            if (count(explode(':', $host))) {
+            if (count(explode(':', $host)) > 1) {
                 list($host, $port) = explode(':', $host);
             }
 
