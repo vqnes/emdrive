@@ -6,7 +6,6 @@ use Emdrive\Command\ScheduledCommandInterface;
 use Emdrive\InterruptableExecutionTrait;
 use Emdrive\Service\PidService;
 use Emdrive\Service\ScheduleService;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;

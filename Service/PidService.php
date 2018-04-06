@@ -2,7 +2,7 @@
 
 namespace Emdrive\Service;
 
-use Emdrive\Command\ScheduledCommandInterface;
+use Emdrive\Command\LockableCommandInterface;
 use Emdrive\DependencyInjection\Config;
 
 class PidService
@@ -24,7 +24,7 @@ class PidService
         $this->dir = trim($config->pidDir, '/');
     }
 
-    public function getPid(ScheduledCommandInterface $command)
+    public function getPid(LockableCommandInterface $command)
     {
         $filename = $this->getFilename($command);
         if (file_exists($filename)) {
@@ -33,7 +33,7 @@ class PidService
         return '';
     }
 
-    public function save(ScheduledCommandInterface $command)
+    public function save(LockableCommandInterface $command)
     {
         $filename = $this->getFilename($command);
         touch($filename);
@@ -41,7 +41,7 @@ class PidService
         fputs($fp, \getmypid());
     }
 
-    public function remove(ScheduledCommandInterface $command)
+    public function remove(LockableCommandInterface $command)
     {
         $filename = $this->getFilename($command);
         if (file_exists($filename)) {
@@ -49,7 +49,7 @@ class PidService
         }
     }
 
-    private function getFilename(ScheduledCommandInterface $command)
+    private function getFilename(LockableCommandInterface $command)
     {
         return sprintf('%s/%s.pid', $this->dir, preg_replace('/[^a-z0-9\._-]+/i', '-', $command->getLockName()));
     }
