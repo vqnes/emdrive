@@ -21,7 +21,7 @@ class PidService
     {
         $this->lockService = $lockService;
 
-        $this->dir = trim($config->pidDir, '/');
+        $this->dir = rtrim($config->pidDir, '/');
     }
 
     public function getPid(LockableCommandInterface $command)
