@@ -70,14 +70,13 @@ class ScheduleService
         } else {
             $fields['status'] = self::STATUS_STOPPED;
 
-            if (!$row = $this->findByName($name)) {
-                throw new \Exception('Record not found in schedule');
+            if ($row = $this->findByName($name)) {
+                $fields['next_start_at'] = $this->getNextStartDate(
+                    $row['schedule_type'],
+                    $row['schedule_value'],
+                    $row['last_start_at']
+                );
             }
-            $fields['next_start_at'] = $this->getNextStartDate(
-                $row['schedule_type'],
-                $row['schedule_value'],
-                $row['last_start_at']
-            );
         }
 
         return $this->updateJob($name, $fields);

@@ -3,6 +3,7 @@
 namespace Emdrive\EventListener;
 
 use Emdrive\Command\ScheduledCommandInterface;
+use Emdrive\Command\Service\RunCommand;
 use Emdrive\InterruptableExecutionTrait;
 use Emdrive\Service\PidService;
 use Emdrive\Service\ScheduleService;
@@ -63,7 +64,7 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
     {
         $command = $event->getCommand();
 
-        if ($command instanceof ScheduledCommandInterface && $event->commandShouldRun()) {
+        if (($command instanceof ScheduledCommandInterface || $command instanceof RunCommand) && $event->commandShouldRun()) {
             $this->initInterruptHandler();
             $this->pidService->save($command);
             $this->schedule->setRunning($command->getName());
@@ -84,7 +85,7 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
     public function onComplete(ConsoleTerminateEvent $event)
     {
         $command = $event->getCommand();
-        if ($command instanceof ScheduledCommandInterface) {
+        if ($command instanceof ScheduledCommandInterface || $command instanceof RunCommand) {
             $this->complete($command);
         }
     }
