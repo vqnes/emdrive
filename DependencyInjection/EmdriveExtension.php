@@ -31,14 +31,7 @@ class EmdriveExtension extends Extension
     private function registerConfigConfiguration(array $config, ContainerBuilder $container)
     {
         $configDef = $container->findDefinition(Config::class);
-        $configDef->setProperty('serverName', $config['server_name']);
-        $configDef->setProperty('logDir', $config['log_dir']);
-        $configDef->setProperty('lockDir', $config['lock_dir']);
-        $configDef->setProperty('pidDir', $config['pid_dir']);
-        $configDef->setProperty('poolSize', $config['pool_size']);
-        $configDef->setProperty('cmdStart', $config['cmd_start']);
-        $configDef->setProperty('cmdKill', $config['cmd_kill']);
-        $configDef->setProperty('tickInterval', $config['tick_interval']);
+        $configDef->setArguments([$config, $container->getParameter('kernel.project_dir')]);
     }
 
     private function registerStorageConfiguration(array $config, ContainerBuilder $container)
