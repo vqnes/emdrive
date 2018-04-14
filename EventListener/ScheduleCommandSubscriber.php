@@ -90,7 +90,7 @@ class ScheduleCommandSubscriber implements EventSubscriberInterface
         }
     }
 
-    public function complete(ScheduledCommandInterface $command)
+    public function complete($command)
     {
         if (!$this->isComplete) {
             $this->pidService->remove($command);
