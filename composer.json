@@ -1,0 +1,27 @@
+{
+    "name": "maksslesarenko/emdrive",
+    "description": "This bundle provides a way to work with recurrent command workers",
+    "keywords": [],
+    "license": "MIT",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Maksym Slesarenko",
+            "email": "maks.slesarenko@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">7.0",
+        "symfony/framework-bundle": ">4.0",
+        "symfony/lock": ">4.0"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Emdrive\\": ""
+        }
+    },
+    "conflict": {
+    }
+}
