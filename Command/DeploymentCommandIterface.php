@@ -17,10 +17,4 @@ interface DeploymentCommandIterface
      * @return int
      */
     public function getDeployPriority();
-
-    /**
-     * Run command only once or every deployment
-     * @return bool
-     */
-    public function deployOnce();
 }

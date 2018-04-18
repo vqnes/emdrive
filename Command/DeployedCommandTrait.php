@@ -13,9 +13,4 @@ trait DeployedCommandTrait
     {
         return 0;
     }
-
-    public function deployOnce()
-    {
-        return false;
-    }
 }

@@ -23,11 +23,6 @@ class UpdateScheduleCommand extends Command implements DeploymentCommandIterface
         return 10000;
     }
 
-    public function deployOnce()
-    {
-        return false;
-    }
-
     /**
      * @var ScheduleService
      */

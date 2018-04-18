@@ -64,9 +64,7 @@ class DeployCommand extends Command
         $commands = [];
         foreach ($this->getApplication()->all() as $command) {
             if ($command instanceof DeploymentCommandIterface) {
-                if ($this->allowToDeploy($command)) {
-                    $commands[$command->getName()] = $command->getDeployPriority();
-                }
+                $commands[$command->getName()] = $command->getDeployPriority();
             }
         }
 
@@ -78,15 +76,6 @@ class DeployCommand extends Command
 
             $input = new ArrayInput([]);
             $command->run($input, $output);
-
-            if ($command->deployOnce()) {
-
-            }
         }
-    }
-
-    public function allowToDeploy(DeploymentCommandIterface $command)
-    {
-        return !$command->deployOnce() || true;
     }
 }
