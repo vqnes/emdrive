@@ -22,4 +22,12 @@ trait LoggerAwareTrait
     {
         $this->logger = $logger;
     }
+
+    /**
+     * @return Logger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
 }
