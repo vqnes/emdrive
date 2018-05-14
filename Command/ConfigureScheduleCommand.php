@@ -70,9 +70,9 @@ class ConfigureScheduleCommand extends Command
         if ('interval' == $scheduleType) {
             do {
                 $scheduleValue = $question->ask($input, $output, new Question('Enter interval', '1 hour'));
-                if (!preg_match('/[1-9][0-9]*\s(hour|minute|day)s{0,1}/i', $scheduleValue)) {
+                if (!preg_match('/[1-9][0-9]*\s(day|hour|minute|second)s{0,1}/i', $scheduleValue)) {
                     $output->writeln(sprintf(
-                        'Invalid value <error>%s</error> enter <comment>X [hour|minute|day]</comment> ',
+                        'Invalid value <error>%s</error> enter <comment>X [day|hour|minute|second]</comment> ',
                         $scheduleValue
                     ));
                 } else {
