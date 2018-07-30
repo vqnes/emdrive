@@ -14,7 +14,7 @@ final class ScheduleController
 
     private $scheduleService;
 
-    public function __construct(\Twig_Environment $twig, ScheduleService $scheduleService)
+    public function __construct(\Twig_Environment $twig = null, ScheduleService $scheduleService)
     {
         $this->twig = $twig;
         $this->scheduleService = $scheduleService;
