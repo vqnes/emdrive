@@ -74,7 +74,7 @@ class UpdateScheduleCommand extends Command implements DeploymentCommandIterface
                         'last_start_at'     => $now,
                         'next_start_at'     => $now,
                         'schedule_type'     => ScheduleService::SCHEDULE_INTERVAL,
-                        'schedule_value'    => '1 hour',
+                        'schedule_value'    => $command->defaultInterval ?? '1 hour',
                     ];
 
                     $this->schedule->addJob($fields);
