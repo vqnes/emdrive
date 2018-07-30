@@ -1,10 +1,14 @@
 services:
-    Emdrive\:
+    _defaults:
         autowire: true
         autoconfigure: true
         public: false
+
+    emdrive.controller:
+        public: true
+        class:  Emdrive\Controller\ScheduleController
+    Emdrive\:
         resource: '../../*'
         # you can exclude directories or files
         # but if a service is unused, it's removed anyway
         exclude: '../../{Entity,Migrations,Tests}'
-
