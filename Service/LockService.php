@@ -2,13 +2,13 @@
 
 namespace Emdrive\Service;
 
-use Symfony\Component\Lock\Factory;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Lock;
 
 class LockService
 {
     /**
-     * @var Factory
+     * @var LockFactory
      */
     private $factory;
 
@@ -17,7 +17,7 @@ class LockService
      */
     private $locks = [];
 
-    public function __construct(Factory $factory)
+    public function __construct(LockFactory $factory)
     {
         $this->factory = $factory;
     }
