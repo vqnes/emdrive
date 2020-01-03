@@ -15,12 +15,14 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class DeployCommand extends Command
 {
+    use LoggerAwareTrait;
+
     /**
      * @var Config
      */
     private $config;
 
-    use LoggerAwareTrait;
+    const SUCCESSFULLY_EXECUTED = 1;
 
     protected function configure()
     {
@@ -77,5 +79,7 @@ class DeployCommand extends Command
             $input = new ArrayInput([]);
             $command->run($input, $output);
         }
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 }

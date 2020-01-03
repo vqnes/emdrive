@@ -36,6 +36,8 @@ class RunCommand extends Command implements LockableCommandInterface
      */
     private $schedule;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
     /**
      * @required
      * @param Config $schedule
@@ -126,6 +128,8 @@ class RunCommand extends Command implements LockableCommandInterface
             }
             $output->writeln('.');
         }
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 
     /**

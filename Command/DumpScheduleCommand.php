@@ -14,6 +14,8 @@ class DumpScheduleCommand extends Command
      */
     private $schedule;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
     /**
      * @required
      * @param ScheduleService $schedule
@@ -38,5 +40,7 @@ class DumpScheduleCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->schedule->drawSchedule($output, $this->schedule->getAll());
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 }
