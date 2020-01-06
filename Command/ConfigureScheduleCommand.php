@@ -19,6 +19,8 @@ class ConfigureScheduleCommand extends Command
      */
     private $schedule;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
 
     /**
      * @required
@@ -51,6 +53,8 @@ class ConfigureScheduleCommand extends Command
                 }
             }
         }
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 
     protected function editSchedule(Command $command, InputInterface $input, OutputInterface $output)

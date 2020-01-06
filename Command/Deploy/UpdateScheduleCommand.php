@@ -18,6 +18,8 @@ class UpdateScheduleCommand extends Command implements DeploymentCommandIterface
 {
     use LoggerAwareTrait;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
     public function getDeployPriority()
     {
         return 10000;
@@ -93,5 +95,7 @@ class UpdateScheduleCommand extends Command implements DeploymentCommandIterface
         if (!$isUpdated) {
             $this->logger->info('Schedule is up to date');
         }
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 }

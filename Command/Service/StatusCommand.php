@@ -24,6 +24,8 @@ class StatusCommand extends Command
      */
     private $schedule;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
     /**
      * @required
      * @param ScheduleService $schedule
@@ -75,6 +77,8 @@ class StatusCommand extends Command
         if ($input->getOption('watch')) {
             $this->watch($input, $output);
         }
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 
     private function watch(InputInterface $input, OutputInterface $output)

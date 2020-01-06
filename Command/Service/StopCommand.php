@@ -18,6 +18,8 @@ class StopCommand extends Command
      */
     private $pidService;
 
+    const SUCCESSFULLY_EXECUTED = 1;
+
     /**
      * @required
      * @param PidService $pidService
@@ -47,5 +49,7 @@ class StopCommand extends Command
             exec('kill -2 ' . $pid);
         }
         $output->writeln('Service - STOPPED');
+
+        return self::SUCCESSFULLY_EXECUTED;
     }
 }
