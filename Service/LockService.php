@@ -2,8 +2,10 @@
 
 namespace Emdrive\Service;
 
+use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Lock;
+use Symfony\Component\Lock\Store\FlockStore;
 
 class LockService
 {
@@ -52,5 +54,40 @@ class LockService
             unset($this->locks[$name]);
             return $result;
         }
+    }
+
+    /**
+     * @param string|null $name
+     * @return string|null
+     */
+    public function getLockFileFullPath(?string $name): ?string
+    {
+        $lockFileFullPath = null;
+
+        if ($lock = $this->locks[$name]) {
+            if ($key = $this->getPrivateKeyFromLock($lock)) {
+                $resource = $key->getState(FlockStore::class);
+                $lockFileFullPath = stream_get_meta_data($resource)["uri"];
+            }
+        }
+
+        return $lockFileFullPath;
+    }
+
+    /**
+     * @param Lock $lock
+     * @return Key|null
+     */
+    private function getPrivateKeyFromLock(Lock $lock): ?Key
+    {
+        $key = null;
+
+        if ($lock) {
+            $reflectionProperty = new \ReflectionProperty(Lock::class, 'key');
+            $reflectionProperty->setAccessible(true);
+            $key = $reflectionProperty->getValue($lock);
+        }
+
+        return $key;
     }
 }
