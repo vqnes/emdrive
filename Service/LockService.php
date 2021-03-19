@@ -2,6 +2,7 @@
 
 namespace Emdrive\Service;
 
+use Emdrive\DeleteLockFileTrait;
 use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Lock;
@@ -9,6 +10,8 @@ use Symfony\Component\Lock\Store\FlockStore;
 
 class LockService
 {
+    use DeleteLockFileTrait;
+
     /**
      * @var LockFactory
      */
@@ -50,8 +53,13 @@ class LockService
     public function unlock($name)
     {
         if (isset($this->locks[$name])) {
+            $lockFileFullPath = $this->getLockFileFullPath($this->locks[$name]);
+
             $result = $this->locks[$name]->release();
             unset($this->locks[$name]);
+
+            $this->deleteLockFile($lockFileFullPath);
+
             return $result;
         }
     }

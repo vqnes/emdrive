@@ -56,11 +56,6 @@ trait LockableExecutionTrait
 
     public function unlock()
     {
-        $lockFileFullPath = $this->lockService->getLockFileFullPath($this->getLockName());
         $this->lockService->unlock($this->getLockName());
-
-        if ($lockFileFullPath) {
-            unlink($lockFileFullPath);
-        }
     }
 }
