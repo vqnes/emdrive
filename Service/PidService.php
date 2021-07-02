@@ -22,6 +22,10 @@ class PidService
         $this->lockService = $lockService;
 
         $this->dir = rtrim($config->pidDir, '/');
+
+        if (!is_dir($this->dir) && !mkdir($directory = $this->dir, 0755, true) && !is_dir($directory)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $directory));
+        }
     }
 
     public function getPid(LockableCommandInterface $command)

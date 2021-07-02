@@ -6,16 +6,20 @@ class Sqlite implements StorageInterface
 {
     private $db;
     private $dsn;
+    private $username;
+    private $password;
 
-    public function __construct($dsn)
+    public function __construct($dsn, $username, $password)
     {
         $this->dsn = $dsn;
+        $this->username = $username;
+        $this->password = $password;
     }
 
     private function getDb()
     {
         if (null === $this->db) {
-            $this->db = new \PDO($this->dsn);
+            $this->db = new \PDO($this->dsn, $this->username, $this->password, [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]);
         }
         return $this->db;
     }
