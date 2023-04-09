@@ -41,9 +41,9 @@ framework:
 
 `bin/console emdrive:configure-schedule [<name>]` # change command schedule time/interval
 
-`bin/console emdrive:service:run` # launch service
+`bin/console emdrive:service:run [--watch]` # launch service
 
-`bin/console emdrive:service:stop` # stop service
+`bin/console emdrive:service:stop [--stop-all]` # stop service
 
 `bin/console emdrive:service:status [--watch]` # check if service is running
 
