@@ -2,9 +2,11 @@
 
 namespace Emdrive\Command\Service;
 
-use Emdrive\Service\PidService;
+use Emdrive\Command\ScheduledCommandInterface;
+use Emdrive\Service\CommandRunnerService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -14,42 +16,63 @@ use Symfony\Component\Console\Output\OutputInterface;
 class StopCommand extends Command
 {
     /**
-     * @var PidService
+     * @var CommandRunnerService
      */
-    private $pidService;
+    private $commandRunnerService;
 
-    const SUCCESSFULLY_EXECUTED = 1;
+    const SUCCESSFULLY_EXECUTED = 0;
 
     /**
      * @required
-     * @param PidService $pidService
      */
-    public function setPidService(PidService $pidService)
+    public function setCommandRunnerService(CommandRunnerService $commandRunnerService): void
     {
-        $this->pidService = $pidService;
+        $this->commandRunnerService = $commandRunnerService;
     }
 
     protected function configure()
     {
         $this
             ->setName('emdrive:service:stop')
-            ->setDescription(
-                'Stop service'
+            ->setDescription('Stop service')
+            ->addOption(
+                'stop-all',
+                null,
+                InputOption::VALUE_NONE,
+                'Stop all running scheduled commands'
             )
         ;
 
         parent::configure();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $runCommand = $this->getApplication()->get('emdrive:service:run');
+       $stopAll = $input->getOption('stop-all') ?: false;
 
-        if ($pid = $this->pidService->getPid($runCommand)) {
-            exec('kill -2 ' . $pid);
-        }
+        $this->commandRunnerService->setAvailableCommands(
+            $this->getCommands($stopAll)
+        );
+        $this->commandRunnerService->stopRunningCommands();
+
         $output->writeln('Service - STOPPED');
 
         return self::SUCCESSFULLY_EXECUTED;
+    }
+
+    private function getCommands(bool $getAll = false): array
+    {
+        $application = $this->getApplication();
+        $commands = [$application->get(RunCommand::COMMAND_NAME)];
+
+        if ($getAll) {
+            foreach ($application->all() as $command) {
+                if ($command instanceof ScheduledCommandInterface) {
+                    $commands[] = $command;
+                }
+            }
+        }
+
+        return $commands;
     }
 }
