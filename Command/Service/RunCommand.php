@@ -8,8 +8,7 @@ use Emdrive\DependencyInjection\Config;
 use Emdrive\InterruptableExecutionTrait;
 use Emdrive\LockableExecutionTrait;
 use Emdrive\LoggerAwareTrait;
-use Emdrive\Service\PidService;
-use Emdrive\Service\ScheduleService;
+use Emdrive\Service\CommandRunnerService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -27,20 +26,23 @@ class RunCommand extends Command implements LockableCommandInterface
     use LoggerAwareTrait;
 
     /**
+     * @var CommandRunnerService
+     */
+    private $commandRunnerService;
+
+    /**
      * @var Config
      */
     private $config;
 
-    /**
-     * @var ScheduleService
-     */
-    private $schedule;
+    const COMMAND_NAME = 'emdrive:service:run';
 
-    const SUCCESSFULLY_EXECUTED = 1;
+    const SUCCESSFULLY_EXECUTED = 0;
 
     /**
      * @required
-     * @param Config $schedule
+     *
+     * @param Config $config
      */
     public function setConfig(Config $config)
     {
@@ -49,25 +51,10 @@ class RunCommand extends Command implements LockableCommandInterface
 
     /**
      * @required
-     * @param ScheduleService $schedule
      */
-    public function setSchedule(ScheduleService $schedule)
+    public function setCommandRunnerService(CommandRunnerService $commandRunnerService): void
     {
-        $this->schedule = $schedule;
-    }
-
-    /**
-     * @var PidService
-     */
-    private $pidService;
-
-    /**
-     * @required
-     * @param PidService $pidService
-     */
-    public function setPidService(PidService $pidService)
-    {
-        $this->pidService = $pidService;
+        $this->commandRunnerService = $commandRunnerService;
     }
 
     public function getLockName()
@@ -78,96 +65,52 @@ class RunCommand extends Command implements LockableCommandInterface
     protected function configure()
     {
         $this
-            ->setName('emdrive:service:run')
+            ->setName(self::COMMAND_NAME)
             ->setDescription(
                 'Start service'
             )
             ->addOption('poolSize', null, InputOption::VALUE_REQUIRED, 'Pool size')
-        ;
+            ->addOption('watch', 'w', InputOption::VALUE_NONE, 'Continuous monitoring and execution of commands');
 
         parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $availableCommands = [];
-        foreach ($this->getApplication()->all() as $command) {
-            if ($command instanceof ScheduledCommandInterface && $command !== $this) {
-                $availableCommands[] = $command;
-            }
+        $watch = $input->getOption('watch');
+        $poolSize = $input->getOption('poolSize');
+
+        if ($poolSize) {
+            $this->commandRunnerService->setPoolSize($poolSize);
         }
+        $this->commandRunnerService->setAvailableCommands(
+            $this->getAvailableCommands()
+        );
 
-        $poolSize = $input->getOption('poolSize') ?: $this->config->poolSize;
-
-        do {
-            $availableSlots = $poolSize - count($this->getRunningCommands($availableCommands));
-
-            if ($availableSlots > 0) {
-                $lockedCommands = $this->getLockedCommands($availableCommands);
-                if ($commandList = $this->schedule->findJobsToBeStarted($availableSlots, $lockedCommands)) {
-                    foreach ($commandList as $command) {
-                        $this->exec($this->config->cmdStart, $command);
-                    }
-                }
-            }
-            usleep($this->config->tickInterval);
-        } while (!$this->isInterrupted());
-
-        if ($this->isInterrupted()) {
-            $output->writeln('Stopping jobs');
-
-            foreach ($this->getRunningCommands($availableCommands) as $commandName) {
-                if ($pid = $this->pidService->getPid($this->getApplication()->get($commandName))) {
-                    $this->exec($this->config->cmdKill, $pid);
-                }
-            }
-
-            while (count($this->getRunningCommands($availableCommands)) > 0) {
-                sleep(1);
-                $output->write('.');
-            }
-            $output->writeln('.');
+        $this->commandRunnerService->runCommandsReadyToBeStarted();
+        if ($watch) {
+            $this->watch();
         }
 
         return self::SUCCESSFULLY_EXECUTED;
     }
 
-    /**
-     * @param ScheduledCommandInterface[] $availableCommands
-     * @return string[]
-     */
-    private function getRunningCommands($availableCommands)
+    private function getAvailableCommands()
     {
-        $commands = [];
-        foreach ($availableCommands as $command) {
-            if ($this->pidService->getPid($command)) {
-                $commands[] = $command->getName();
+        foreach ($this->getApplication()->all() as $command) {
+            if ($command instanceof ScheduledCommandInterface && $command !== $this) {
+                $this->availableCommands[] = $command;
             }
         }
-        return $commands;
+
+        return $this->availableCommands;
     }
 
-    /**
-     * @param ScheduledCommandInterface[] $availableCommands
-     * @return string[]
-     */
-    private function getLockedCommands($availableCommands)
+    private function watch()
     {
-        $commands = [];
-        foreach ($availableCommands as $command) {
-            if ($command->isLockedExecution()) {
-                $commands[] = $command->getName();
-            }
+        while (!$this->isInterrupted()) {
+            $this->commandRunnerService->runCommandsReadyToBeStarted();
+            usleep($this->config->tickInterval);
         }
-        return $commands;
-    }
-
-    private function exec($cmdTemplate, $argument)
-    {
-        $cmd = sprintf($cmdTemplate, $argument);
-
-        $this->logger->notice(sprintf('Exec: <info>%s</info>', $cmd));
-
-        exec($cmd);
     }
 }
